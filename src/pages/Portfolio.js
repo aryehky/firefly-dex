@@ -12,6 +12,8 @@ import {
     TableHead,
     TableRow,
     Chip,
+    Tabs,
+    Tab,
 } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import {
@@ -24,6 +26,8 @@ import {
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Portfolio = () => {
+    const [tabValue, setTabValue] = useState(0);
+
     // Mock portfolio data
     const portfolioData = {
         totalValue: 12500.00,
@@ -77,150 +81,110 @@ const Portfolio = () => {
         },
     };
 
+    const handleTabChange = (event, newValue) => {
+        setTabValue(newValue);
+    };
+
     return ( <
-        Container maxWidth = "xl"
+        Container maxWidth = "lg"
         sx = {
             { mt: 4, mb: 4 }
         } >
         <
-        Grid container spacing = { 3 } > { /* Portfolio Summary */ } <
-        Grid item xs = { 12 }
-        md = { 4 } >
-        <
-        Paper sx = {
-            { p: 2 }
-        } >
-        <
-        Typography variant = "h6"
-        gutterBottom >
-        Portfolio Value <
-        /Typography> <
         Typography variant = "h4"
-        color = "primary" >
-        $ { portfolioData.totalValue.toLocaleString() } <
-        /Typography> <
+        gutterBottom >
+        Portfolio <
+        /Typography>
+
+        <
         Box sx = {
-            { height: 300, mt: 2 }
+            { borderBottom: 1, borderColor: 'divider', mb: 3 }
         } >
         <
-        Pie data = { pieChartData }
-        options = { pieChartOptions }
-        /> < /
-        Box > <
-        /Paper> < /
-        Grid >
+        Tabs value = { tabValue }
+        onChange = { handleTabChange } >
+        <
+        Tab label = "Assets" / >
+        <
+        Tab label = "Transaction History" / >
+        <
+        /Tabs> < /
+        Box >
 
-        { /* Assets Table */ } <
-        Grid item xs = { 12 }
-        md = { 8 } >
-        <
-        Paper sx = {
-            { p: 2 }
-        } >
-        <
-        Typography variant = "h6"
-        gutterBottom >
-        Your Assets <
-        /Typography> <
-        TableContainer >
-        <
-        Table >
-        <
-        TableHead >
-        <
-        TableRow >
-        <
-        TableCell > Asset < /TableCell> <
-        TableCell align = "right" > Amount < /TableCell> <
-        TableCell align = "right" > Value(USD) < /TableCell> <
-        TableCell align = "right" > % of Portfolio < /TableCell> < /
-        TableRow > <
-        /TableHead> <
-        TableBody > {
-            portfolioData.assets.map((asset) => ( <
-                TableRow key = { asset.symbol } >
+        {
+            tabValue === 0 && ( <
+                TableContainer component = { Paper } >
                 <
-                TableCell > { asset.symbol } < /TableCell> <
-                TableCell align = "right" > { asset.amount } < /TableCell> <
-                TableCell align = "right" >
-                $ { asset.value.toLocaleString() } <
-                /TableCell> <
-                TableCell align = "right" > {
-                    ((asset.value / portfolioData.totalValue) * 100).toFixed(2)
-                } %
+                Table >
                 <
-                /TableCell> < /
+                TableHead >
+                <
                 TableRow >
-            ))
-        } <
-        /TableBody> < /
-        Table > <
-        /TableContainer> < /
-        Paper > <
-        /Grid>
+                <
+                TableCell > Asset < /TableCell> <
+                TableCell align = "right" > Balance < /TableCell> <
+                TableCell align = "right" > Value(USD) < /TableCell> < /
+                TableRow > <
+                /TableHead> <
+                TableBody > {
+                    portfolioData.assets.map((asset) => ( <
+                        TableRow key = { asset.symbol } >
+                        <
+                        TableCell component = "th"
+                        scope = "row" > { asset.symbol } <
+                        /TableCell> <
+                        TableCell align = "right" > { asset.amount } < /TableCell> <
+                        TableCell align = "right" > $ { asset.value.toLocaleString() } < /TableCell> < /
+                        TableRow >
+                    ))
+                } <
+                /TableBody> < /
+                Table > <
+                /TableContainer>
+            )
+        }
 
-        { /* Transaction History */ } <
-        Grid item xs = { 12 } >
-        <
-        Paper sx = {
-            { p: 2 }
-        } >
-        <
-        Typography variant = "h6"
-        gutterBottom >
-        Transaction History <
-        /Typography> <
-        TableContainer >
-        <
-        Table >
-        <
-        TableHead >
-        <
-        TableRow >
-        <
-        TableCell > Date < /TableCell> <
-        TableCell > Type < /TableCell> <
-        TableCell > Pair < /TableCell> <
-        TableCell align = "right" > Amount < /TableCell> <
-        TableCell align = "right" > Price < /TableCell> <
-        TableCell align = "right" > Total < /TableCell> <
-        TableCell > Status < /TableCell> < /
-        TableRow > <
-        /TableHead> <
-        TableBody > {
-            portfolioData.transactions.map((tx) => ( <
-                TableRow key = { tx.id } >
+        {
+            tabValue === 1 && ( <
+                TableContainer component = { Paper } >
                 <
-                TableCell > { tx.date } < /TableCell> <
-                TableCell >
+                Table >
                 <
-                Chip label = { tx.type.toUpperCase() }
-                color = { tx.type === 'buy' ? 'success' : 'error' }
-                size = "small" /
-                >
+                TableHead >
                 <
-                /TableCell> <
-                TableCell > { tx.pair } < /TableCell> <
-                TableCell align = "right" > { tx.amount } < /TableCell> <
-                TableCell align = "right" > $ { tx.price } < /TableCell> <
-                TableCell align = "right" > $ { tx.total } < /TableCell> <
-                TableCell >
-                <
-                Chip label = { tx.status }
-                color = "primary"
-                size = "small" /
-                >
-                <
-                /TableCell> < /
                 TableRow >
-            ))
+                <
+                TableCell > Type < /TableCell> <
+                TableCell > Asset < /TableCell> <
+                TableCell align = "right" > Amount < /TableCell> <
+                TableCell align = "right" > Price < /TableCell> <
+                TableCell > Date < /TableCell> < /
+                TableRow > <
+                /TableHead> <
+                TableBody > {
+                    portfolioData.transactions.map((transaction, index) => ( <
+                        TableRow key = { index } >
+                        <
+                        TableCell component = "th"
+                        scope = "row"
+                        sx = {
+                            {
+                                color: transaction.type === 'buy' ? 'success.main' : 'error.main',
+                            }
+                        } > { transaction.type.toUpperCase() } <
+                        /TableCell> <
+                        TableCell > { transaction.pair.split('/')[0] } < /TableCell> <
+                        TableCell align = "right" > { transaction.amount } < /TableCell> <
+                        TableCell align = "right" > $ { transaction.price.toLocaleString() } < /TableCell> <
+                        TableCell > { transaction.date } < /TableCell> < /
+                        TableRow >
+                    ))
+                } <
+                /TableBody> < /
+                Table > <
+                /TableContainer>
+            )
         } <
-        /TableBody> < /
-        Table > <
-        /TableContainer> < /
-        Paper > <
-        /Grid> < /
-        Grid > <
         /Container>
     );
 };
