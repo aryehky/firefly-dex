@@ -15,15 +15,29 @@ import {
     Tabs,
     Tab,
 } from '@mui/material';
-import { Pie } from 'react-chartjs-2';
+import { Pie, Line } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
     ArcElement,
     Tooltip,
     Legend,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
 } from 'chart.js';
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(
+    ArcElement,
+    Tooltip,
+    Legend,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title
+);
 
 const Portfolio = () => {
     const [tabValue, setTabValue] = useState(0);
@@ -57,6 +71,10 @@ const Portfolio = () => {
                 status: 'completed',
             },
         ],
+        performance: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            data: [10000, 10500, 11000, 10800, 11500, 12500],
+        },
     };
 
     // Prepare data for pie chart
@@ -81,6 +99,33 @@ const Portfolio = () => {
         },
     };
 
+    // Prepare data for performance chart
+    const performanceChartData = {
+        labels: portfolioData.performance.labels,
+        datasets: [{
+            label: 'Portfolio Value (USD)',
+            data: portfolioData.performance.data,
+            borderColor: '#FF6B6B',
+            tension: 0.4,
+            fill: true,
+            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+        }],
+    };
+
+    const performanceChartOptions = {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+        },
+        scales: {
+            y: {
+                beginAtZero: false,
+            },
+        },
+    };
+
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
     };
@@ -95,6 +140,72 @@ const Portfolio = () => {
         gutterBottom >
         Portfolio <
         /Typography>
+
+        {
+            /* Portfolio Summary */
+            <
+            Grid container spacing = { 3 }
+            sx = {
+                { mb: 4 }
+            } >
+            <
+            Grid item xs = { 12 }
+            md = { 6 } >
+            <
+            Paper sx = {
+                { p: 2 }
+            } >
+            <
+            Typography variant = "h6"
+            gutterBottom >
+            Portfolio Value <
+            /Typography>
+            <
+            Typography variant = "h4"
+            color = "primary" >
+            $ { portfolioData.totalValue.toLocaleString() } <
+            /Typography>
+            <
+            Box sx = {
+                { height: 300, mt: 2 }
+            } >
+            <
+            Line data = { performanceChartData }
+            options = { performanceChartOptions } />
+            </
+            Box >
+            </
+            Paper >
+            </
+            Grid >
+            <
+            Grid item xs = { 12 }
+            md = { 6 } >
+            <
+            Paper sx = {
+                { p: 2 }
+            } >
+            <
+            Typography variant = "h6"
+            gutterBottom >
+            Asset Allocation <
+            /Typography>
+            <
+            Box sx = {
+                { height: 300 }
+            } >
+            <
+            Pie data = { pieChartData }
+            options = { pieChartOptions } />
+            </
+            Box >
+            </
+            Paper >
+            </
+            Grid >
+            </
+            Grid >
+        }
 
         <
         Box sx = {
@@ -123,7 +234,8 @@ const Portfolio = () => {
                 <
                 TableCell > Asset < /TableCell> <
                 TableCell align = "right" > Balance < /TableCell> <
-                TableCell align = "right" > Value(USD) < /TableCell> < /
+                TableCell align = "right" > Value(USD) < /TableCell> <
+                TableCell align = "right" > % of Portfolio < /TableCell> < /
                 TableRow > <
                 /TableHead> <
                 TableBody > {
@@ -134,7 +246,8 @@ const Portfolio = () => {
                         scope = "row" > { asset.symbol } <
                         /TableCell> <
                         TableCell align = "right" > { asset.amount } < /TableCell> <
-                        TableCell align = "right" > $ { asset.value.toLocaleString() } < /TableCell> < /
+                        TableCell align = "right" > $ { asset.value.toLocaleString() } < /TableCell> <
+                        TableCell align = "right" > { ((asset.value / portfolioData.totalValue) * 100).toFixed(2) } % < /TableCell> < /
                         TableRow >
                     ))
                 } <
@@ -155,27 +268,27 @@ const Portfolio = () => {
                 TableRow >
                 <
                 TableCell > Type < /TableCell> <
-                TableCell > Asset < /TableCell> <
+                TableCell > Pair < /TableCell> <
                 TableCell align = "right" > Amount < /TableCell> <
                 TableCell align = "right" > Price < /TableCell> <
+                TableCell align = "right" > Total < /TableCell> <
+                TableCell > Status < /TableCell> <
                 TableCell > Date < /TableCell> < /
                 TableRow > <
                 /TableHead> <
                 TableBody > {
-                    portfolioData.transactions.map((transaction, index) => ( <
-                        TableRow key = { index } >
+                    portfolioData.transactions.map((transaction) => ( <
+                        TableRow key = { transaction.id } >
                         <
-                        TableCell component = "th"
-                        scope = "row"
-                        sx = {
-                            {
-                                color: transaction.type === 'buy' ? 'success.main' : 'error.main',
-                            }
-                        } > { transaction.type.toUpperCase() } <
-                        /TableCell> <
-                        TableCell > { transaction.pair.split('/')[0] } < /TableCell> <
+                        TableCell > { transaction.type.toUpperCase() } < /TableCell> <
+                        TableCell > { transaction.pair } < /TableCell> <
                         TableCell align = "right" > { transaction.amount } < /TableCell> <
-                        TableCell align = "right" > $ { transaction.price.toLocaleString() } < /TableCell> <
+                        TableCell align = "right" > $ { transaction.price } < /TableCell> <
+                        TableCell align = "right" > $ { transaction.total } < /TableCell> <
+                        TableCell > { <
+                            Chip label = { transaction.status }
+                            color = "primary"
+                            size = "small" /> } < /TableCell> <
                         TableCell > { transaction.date } < /TableCell> < /
                         TableRow >
                     ))
