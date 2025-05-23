@@ -11,6 +11,13 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from '@mui/material';
 import { Line } from 'react-chartjs-2';
 import {
@@ -81,10 +88,47 @@ const Trading = () => {
     ],
   };
 
+  // Mock trading history data
+  const tradingHistory = [
+    {
+      id: 1,
+      type: 'buy',
+      pair: 'BTC/ETH',
+      amount: 0.1,
+      price: 0.052,
+      total: 0.0052,
+      status: 'completed',
+      date: '2024-03-15 14:30',
+    },
+    {
+      id: 2,
+      type: 'sell',
+      pair: 'BTC/ETH',
+      amount: 0.05,
+      price: 0.053,
+      total: 0.00265,
+      status: 'pending',
+      date: '2024-03-15 14:25',
+    },
+  ];
+
   const handleSubmit = (e) => {
     e.preventDefault();
     // TODO: Implement order submission logic
     console.log('Order submitted:', { orderType, amount, price, selectedPair });
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'completed':
+        return 'success';
+      case 'pending':
+        return 'warning';
+      case 'cancelled':
+        return 'error';
+      default:
+        return 'default';
+    }
   };
 
   return (
@@ -134,7 +178,7 @@ const Trading = () => {
         </Grid>
 
         {/* Trading Form */}
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Place Order
@@ -201,6 +245,55 @@ const Trading = () => {
                 </Grid>
               </Grid>
             </Box>
+          </Paper>
+        </Grid>
+
+        {/* Trading History */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Recent Orders
+            </Typography>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Type</TableCell>
+                    <TableCell>Pair</TableCell>
+                    <TableCell align="right">Amount</TableCell>
+                    <TableCell align="right">Price</TableCell>
+                    <TableCell align="right">Total</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Date</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {tradingHistory.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell>
+                        <Chip
+                          label={order.type.toUpperCase()}
+                          color={order.type === 'buy' ? 'success' : 'error'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>{order.pair}</TableCell>
+                      <TableCell align="right">{order.amount}</TableCell>
+                      <TableCell align="right">{order.price}</TableCell>
+                      <TableCell align="right">{order.total}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={order.status}
+                          color={getStatusColor(order.status)}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>{order.date}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Paper>
         </Grid>
       </Grid>
