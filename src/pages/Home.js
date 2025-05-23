@@ -1,128 +1,88 @@
 import React from 'react';
-import {
-    Container,
-    Typography,
-    Grid,
-    Card,
-    CardContent,
-    Button,
-    Box
-} from '@mui/material';
+import { Container, Typography, Button, Grid, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import SecurityIcon from '@mui/icons-material/Security';
 import SpeedIcon from '@mui/icons-material/Speed';
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import IntegrationInstructionsIcon from '@mui/icons-material/IntegrationInstructions';
 
 const Home = () => {
     const navigate = useNavigate();
 
-    const features = [{
-            icon: < SecurityIcon sx = {
-                { fontSize: 40 }
-            }
-            />,
+    const features = [
+        {
             title: 'Secure Trading',
-            description: 'Built on the FireFly blockchain for maximum security and transparency'
+            description: 'Advanced security measures to protect your assets and transactions',
+            icon: <SecurityIcon sx={{ fontSize: 40 }} />,
         },
         {
-            icon: < SpeedIcon sx = {
-                { fontSize: 40 }
-            }
-            />,
             title: 'Lightning Fast',
-            description: 'Advanced order matching engine for instant trade execution'
+            description: 'High-performance trading engine for instant order execution',
+            icon: <SpeedIcon sx={{ fontSize: 40 }} />,
         },
         {
-            icon: < AccountBalanceWalletIcon sx = {
-                { fontSize: 40 }
-            }
-            />,
             title: 'Easy Integration',
-            description: 'Seamless wallet connection and asset management'
-        }
+            description: 'Seamless integration with popular wallets and trading tools',
+            icon: <IntegrationInstructionsIcon sx={{ fontSize: 40 }} />,
+        },
     ];
 
-    return ( <
-        Box > { /* Hero Section */ } <
-        Box sx = {
-            {
-                bgcolor: 'background.paper',
-                pt: 8,
-                pb: 6,
-                textAlign: 'center'
-            }
-        } >
-        <
-        Container maxWidth = "sm" >
-        <
-        Typography component = "h1"
-        variant = "h2"
-        color = "primary"
-        gutterBottom >
-        FireFlyDex <
-        /Typography> <
-        Typography variant = "h5"
-        color = "text.secondary"
-        paragraph >
-        Trade cryptocurrencies securely and efficiently on the FireFly blockchain.Experience the future of decentralized trading. <
-        /Typography> <
-        Button variant = "contained"
-        color = "primary"
-        size = "large"
-        onClick = {
-            () => navigate('/trading')
-        }
-        sx = {
-            { mt: 4 }
-        } >
-        Start Trading <
-        /Button> < /
-        Container > <
-        /Box>
+    return (
+        <Container maxWidth="lg">
+            {/* Hero Section */}
+            <Box
+                sx={{
+                    pt: 8,
+                    pb: 6,
+                    textAlign: 'center',
+                }}
+            >
+                <Typography
+                    component="h1"
+                    variant="h2"
+                    color="text.primary"
+                    gutterBottom
+                >
+                    Welcome to FireFlyDex
+                </Typography>
+                <Typography variant="h5" color="text.secondary" paragraph>
+                    The next generation decentralized exchange for seamless crypto trading
+                </Typography>
+                <Button
+                    variant="contained"
+                    size="large"
+                    onClick={() => navigate('/trading')}
+                    sx={{ mt: 4 }}
+                >
+                    Start Trading
+                </Button>
+            </Box>
 
-        { /* Features Section */ } <
-        Container sx = {
-            { py: 8 }
-        }
-        maxWidth = "md" >
-        <
-        Grid container spacing = { 4 } > {
-            features.map((feature, index) => ( <
-                Grid item key = { index }
-                xs = { 12 }
-                sm = { 6 }
-                md = { 4 } >
-                <
-                Card sx = {
-                    {
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        textAlign: 'center',
-                        p: 2
-                    }
-                } >
-                <
-                Box sx = {
-                    { color: 'primary.main', mb: 2 }
-                } > { feature.icon } <
-                /Box> <
-                CardContent >
-                <
-                Typography gutterBottom variant = "h5"
-                component = "h2" > { feature.title } <
-                /Typography> <
-                Typography color = "text.secondary" > { feature.description } <
-                /Typography> < /
-                CardContent > <
-                /Card> < /
-                Grid >
-            ))
-        } <
-        /Grid> < /
-        Container > <
-        /Box>
+            {/* Features Section */}
+            <Grid container spacing={4} sx={{ mt: 4 }}>
+                {features.map((feature, index) => (
+                    <Grid item key={index} xs={12} md={4}>
+                        <Box
+                            sx={{
+                                p: 3,
+                                textAlign: 'center',
+                                height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Box sx={{ color: 'primary.main', mb: 2 }}>{feature.icon}</Box>
+                            <Typography variant="h5" component="h2" gutterBottom>
+                                {feature.title}
+                            </Typography>
+                            <Typography color="text.secondary">
+                                {feature.description}
+                            </Typography>
+                        </Box>
+                    </Grid>
+                ))}
+            </Grid>
+        </Container>
     );
 };
 
