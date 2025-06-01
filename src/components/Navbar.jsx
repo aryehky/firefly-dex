@@ -13,6 +13,7 @@ import {
   Tooltip,
   CircularProgress,
 } from '@mui/material';
+import { Menu as MenuIcon } from '@mui/icons-material';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
@@ -20,140 +21,123 @@ import WarningIcon from '@mui/icons-material/Warning';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = useState(null);
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
   const [network, setNetwork] = useState('');
-  const [balance, setBalance] = useState('0.00');
-  const [isValidNetwork, setIsValidNetwork] = useState(false);
+  const [balance, setBalance] = useState(0);
+  const [isValidNetwork, setIsValidNetwork] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const updateNetworkInfo = useCallback(async () => {
-    try {
-      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-      setNetwork(chainId);
-      validateNetwork(chainId);
-    } catch (error) {
-      console.error('Error getting network info:', error);
+    if (window.ethereum) {
+      try {
+        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        const validChainId = '0x1'; // Ethereum Mainnet
+        setIsValidNetwork(chainId === validChainId);
+        setNetwork(chainId === validChainId ? 'Ethereum Mainnet' : 'Unknown Network');
+      } catch (error) {
+        console.error('Error getting network:', error);
+      }
     }
   }, []);
 
-  const validateNetwork = (chainId) => {
-    // Replace with actual FireFly network chainId
-    const validChainId = '0x1';
-    setIsValidNetwork(chainId === validChainId);
+  useEffect(() => {
+    if (window.ethereum) {
+      window.ethereum.on('chainChanged', updateNetworkInfo);
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      updateNetworkInfo();
+    }
+    return () => {
+      if (window.ethereum) {
+        window.ethereum.removeListener('chainChanged', updateNetworkInfo);
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+      }
+    };
+  }, [updateNetworkInfo]);
+
+  const handleAccountsChanged = (accounts) => {
+    if (accounts.length > 0) {
+      setWalletConnected(true);
+      setWalletAddress(accounts[0]);
+      updateBalance(accounts[0]);
+    } else {
+      setWalletConnected(false);
+      setWalletAddress('');
+      setBalance(0);
+    }
   };
 
   const updateBalance = async (address) => {
-    try {
-      const balance = await window.ethereum.request({
-        method: 'eth_getBalance',
-        params: [address, 'latest'],
-      });
-      // Convert balance from wei to ETH
-      const ethBalance = (parseInt(balance, 16) / 1e18).toFixed(4);
-      setBalance(ethBalance);
-    } catch (error) {
-      console.error('Error getting balance:', error);
-    }
-  };
-
-  useEffect(() => {
-    // Check if wallet is already connected
     if (window.ethereum) {
-      window.ethereum.request({ method: 'eth_accounts' })
-        .then(accounts => {
-          if (accounts.length > 0) {
-            setWalletConnected(true);
-            setWalletAddress(accounts[0]);
-            updateNetworkInfo();
-            updateBalance(accounts[0]);
-          }
+      try {
+        const balance = await window.ethereum.request({
+          method: 'eth_getBalance',
+          params: [address, 'latest'],
         });
-
-      // Listen for account changes
-      window.ethereum.on('accountsChanged', (accounts) => {
-        if (accounts.length > 0) {
-          setWalletConnected(true);
-          setWalletAddress(accounts[0]);
-          updateBalance(accounts[0]);
-        } else {
-          setWalletConnected(false);
-          setWalletAddress('');
-          setBalance('0.00');
-        }
-      });
-
-      // Listen for network changes
-      window.ethereum.on('chainChanged', () => {
-        updateNetworkInfo();
-      });
-    }
-  }, [updateNetworkInfo]);
-
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleWalletConnect = async () => {
-    setIsLoading(true);
-    try {
-      if (window.ethereum) {
-        const accounts = await window.ethereum.request({
-          method: 'eth_requestAccounts',
-        });
-        if (accounts.length > 0) {
-          setWalletConnected(true);
-          setWalletAddress(accounts[0]);
-          updateNetworkInfo();
-          updateBalance(accounts[0]);
-          handleClose();
-        }
-      } else {
-        alert('Please install MetaMask to use this feature');
+        setBalance(parseInt(balance, 16) / 1e18);
+      } catch (error) {
+        console.error('Error getting balance:', error);
       }
-    } catch (error) {
-      console.error('Error connecting wallet:', error);
-      alert('Failed to connect wallet');
-    } finally {
+    }
+  };
+
+  const connectWallet = async () => {
+    if (window.ethereum) {
+      setIsLoading(true);
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        handleAccountsChanged(accounts);
+      } catch (error) {
+        console.error('Error connecting wallet:', error);
+      }
       setIsLoading(false);
     }
   };
 
   const handleNetworkSwitch = async () => {
-    try {
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x1' }], // Replace with actual FireFly chainId
-      });
-    } catch (error) {
-      if (error.code === 4902) {
-        try {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: '0x1',
-              chainName: 'FireFly Network',
-              nativeCurrency: {
-                name: 'ETH',
-                symbol: 'ETH',
-                decimals: 18
-              },
-              rpcUrls: ['https://rpc.firefly.network'],
-              blockExplorerUrls: ['https://explorer.firefly.network']
-            }]
-          });
-        } catch (addError) {
-          alert('Failed to add FireFly network');
+    if (window.ethereum) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x1' }],
+        });
+      } catch (error) {
+        if (error.code === 4902) {
+          try {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: '0x1',
+                chainName: 'Ethereum Mainnet',
+                nativeCurrency: {
+                  name: 'Ether',
+                  symbol: 'ETH',
+                  decimals: 18,
+                },
+                rpcUrls: ['https://mainnet.infura.io/v3/your-project-id'],
+                blockExplorerUrls: ['https://etherscan.io'],
+              }],
+            });
+          } catch (addError) {
+            console.error('Error adding network:', addError);
+          }
         }
-      } else {
-        alert('Failed to switch network');
       }
     }
+  };
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    handleMenuClose();
   };
 
   const getNetworkName = (chainId) => {
@@ -176,86 +160,78 @@ const Navbar = () => {
   };
 
   return (
-    <AppBar position="static">
-      <Toolbar>
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{ flexGrow: 1, cursor: 'pointer' }}
-          onClick={() => navigate('/')}
-        >
-          FireFlyDex
-        </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button color="inherit" onClick={() => navigate('/trading')}>
-            Trading
-          </Button>
-          <Button color="inherit" onClick={() => navigate('/portfolio')}>
-            Portfolio
-          </Button>
-          {walletConnected && (
-            <>
-              <Tooltip title={isValidNetwork ? "Network Status" : "Please switch to FireFly Network"}>
-                <Chip
-                  icon={isValidNetwork ? <SignalCellularAltIcon /> : <WarningIcon />}
-                  label={getNetworkName(network)}
-                  color={isValidNetwork ? "primary" : "error"}
-                  variant="outlined"
-                  size="small"
-                  onClick={handleNetworkSwitch}
-                  sx={{ cursor: 'pointer' }}
-                />
-              </Tooltip>
-              <Tooltip title="Wallet Balance">
-                <Chip
-                  icon={<AccountBalanceIcon />}
-                  label={`${balance} ETH`}
-                  color="primary"
-                  variant="outlined"
-                  size="small"
-                />
-              </Tooltip>
-            </>
-          )}
+    <AppBar position="static" className="bg-transparent backdrop-blur-lg border-b border-white/20">
+      <Toolbar className="justify-between">
+        <div className="flex items-center">
           <IconButton
-            size="large"
-            edge="end"
+            edge="start"
             color="inherit"
-            aria-label="wallet"
-            aria-controls="wallet-menu"
-            aria-haspopup="true"
-            onClick={handleMenu}
-            disabled={isLoading}
+            aria-label="menu"
+            onClick={handleMenuClick}
+            className="text-white mr-4"
           >
-            {isLoading ? <CircularProgress size={24} color="inherit" /> : <AccountBalanceWalletIcon />}
+            <MenuIcon />
           </IconButton>
-          <Menu
-            id="wallet-menu"
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right',
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-          >
-            {walletConnected ? (
-              <>
-                <MenuItem disabled>
-                  {formatAddress(walletAddress)}
-                </MenuItem>
-                <MenuItem onClick={handleClose}>Disconnect</MenuItem>
-              </>
-            ) : (
-              <MenuItem onClick={handleWalletConnect}>Connect Wallet</MenuItem>
-            )}
-          </Menu>
-        </Box>
+          <Typography variant="h6" className="rainbow-text font-bold">
+            FireFlyDex
+          </Typography>
+        </div>
+
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+          className="mt-12"
+        >
+          <MenuItem onClick={() => handleNavigation('/')} className="text-white hover:bg-white/10">
+            Home
+          </MenuItem>
+          <MenuItem onClick={() => handleNavigation('/trading')} className="text-white hover:bg-white/10">
+            Trading
+          </MenuItem>
+          <MenuItem onClick={() => handleNavigation('/portfolio')} className="text-white hover:bg-white/10">
+            Portfolio
+          </MenuItem>
+        </Menu>
+
+        <div className="flex items-center gap-4">
+          {!isValidNetwork && (
+            <Tooltip title="Switch to Ethereum Mainnet">
+              <Chip
+                label="Wrong Network"
+                color="error"
+                onClick={handleNetworkSwitch}
+                className="cursor-pointer"
+              />
+            </Tooltip>
+          )}
+          
+          {walletConnected ? (
+            <div className="flex items-center gap-2">
+              <Chip
+                label={network}
+                className="bg-white/10 text-white border border-white/20"
+              />
+              <Chip
+                label={`${balance.toFixed(4)} ETH`}
+                className="bg-white/10 text-white border border-white/20"
+              />
+              <Chip
+                label={`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}
+                className="bg-white/10 text-white border border-white/20"
+              />
+            </div>
+          ) : (
+            <Button
+              variant="contained"
+              onClick={connectWallet}
+              disabled={isLoading}
+              className="bg-gradient-to-r from-rainbow-100 via-rainbow-400 to-rainbow-700 text-white hover:opacity-90"
+            >
+              {isLoading ? <CircularProgress size={24} className="text-white" /> : 'Connect Wallet'}
+            </Button>
+          )}
+        </div>
       </Toolbar>
     </AppBar>
   );
