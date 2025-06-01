@@ -1,23 +1,23 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
-  Grid,
-  Paper,
   Typography,
   Box,
+  Paper,
+  Grid,
   TextField,
   Button,
   Select,
   MenuItem,
   FormControl,
   InputLabel,
-  Chip,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Chip,
 } from '@mui/material';
 import { Line } from 'react-chartjs-2';
 import {
@@ -42,310 +42,252 @@ ChartJS.register(
 );
 
 const Trading = () => {
-  const [orderType, setOrderType] = useState('limit');
+  const [orderType, setOrderType] = useState('market');
   const [amount, setAmount] = useState('');
   const [price, setPrice] = useState('');
-  const [selectedPair, setSelectedPair] = useState('BTC/ETH');
-  const [realTimePrice, setRealTimePrice] = useState(null);
+  const [selectedPair, setSelectedPair] = useState('ETH/USDT');
+  const [realTimePrice, setRealTimePrice] = useState(0);
   const [wsConnection, setWsConnection] = useState(null);
+  const [orderBook, setOrderBook] = useState({
+    bids: [],
+    asks: [],
+  });
+
   const [chartData, setChartData] = useState({
-    labels: ['1h', '2h', '3h', '4h', '5h', '6h'],
+    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
     datasets: [
       {
-        label: 'BTC/ETH Price',
-        data: [0.05, 0.052, 0.051, 0.053, 0.054, 0.052],
-        borderColor: '#FF6B6B',
-        tension: 0.4,
+        label: 'Price',
+        data: [2000, 2100, 2050, 2200, 2150, 2300],
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1,
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
       },
     ],
   });
-  const [orderBook, setOrderBook] = useState({
-    bids: [],
-    asks: []
-  });
 
-  // WebSocket connection setup
   useEffect(() => {
-    const ws = new WebSocket('wss://api.fireflydex.com/ws');
-    
-    ws.onopen = () => {
-      console.log('WebSocket Connected');
-      // Subscribe to price updates
-      ws.send(JSON.stringify({
-        type: 'subscribe',
-        channel: 'price',
-        pair: selectedPair
-      }));
-    };
-
+    // Mock WebSocket connection
+    const ws = new WebSocket('wss://mock-websocket-url');
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === 'price') {
         setRealTimePrice(data.price);
-        // Update chart data
-        setChartData(prevData => ({
-          ...prevData,
-          datasets: [{
-            ...prevData.datasets[0],
-            data: [...prevData.datasets[0].data.slice(1), data.price]
-          }]
-        }));
+        updateChart(data.price);
       } else if (data.type === 'orderbook') {
         setOrderBook(data.orderbook);
       }
     };
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-
     setWsConnection(ws);
 
     return () => {
-      ws.close();
+      if (ws) {
+        ws.close();
+      }
     };
-  }, [selectedPair]);
+  }, []);
 
-  // Update WebSocket subscription when pair changes
-  useEffect(() => {
-    if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
-      wsConnection.send(JSON.stringify({
-        type: 'subscribe',
-        channel: 'price',
-        pair: selectedPair
-      }));
-    }
-  }, [selectedPair, wsConnection]);
-
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: false,
-      },
-    },
+  const updateChart = (newPrice) => {
+    setChartData((prevData) => {
+      const newData = { ...prevData };
+      newData.datasets[0].data = [...newData.datasets[0].data.slice(1), newPrice];
+      return newData;
+    });
   };
 
-  // Mock trading history data
-  const tradingHistory = [
-    {
-      id: 1,
-      type: 'buy',
-      pair: 'BTC/ETH',
-      amount: 0.1,
-      price: 0.052,
-      total: 0.0052,
-      status: 'completed',
-      date: '2024-03-15 14:30',
-    },
-    {
-      id: 2,
-      type: 'sell',
-      pair: 'BTC/ETH',
-      amount: 0.05,
-      price: 0.053,
-      total: 0.00265,
-      status: 'pending',
-      date: '2024-03-15 14:25',
-    },
-  ];
-
-  const handleSubmit = (e) => {
+  const handleOrderSubmit = (e) => {
     e.preventDefault();
-    // TODO: Implement order submission logic
+    // Handle order submission
     console.log('Order submitted:', { orderType, amount, price, selectedPair });
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'completed':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      case 'cancelled':
-        return 'error';
-      default:
-        return 'default';
-    }
-  };
-
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      <Grid container spacing={3}>
-        {/* Price Chart */}
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Price Chart - {selectedPair}
-            </Typography>
-            {realTimePrice && (
-              <Typography variant="h4" color="primary" gutterBottom>
-                ${realTimePrice.toFixed(2)}
-              </Typography>
-            )}
-            <Box sx={{ height: 400 }}>
-              <Line data={chartData} options={chartOptions} />
-            </Box>
-          </Paper>
-        </Grid>
+    <div className="min-h-screen bg-gradient-to-br from-rainbow-100 via-rainbow-400 to-rainbow-700 animate-gradient-xy">
+      <Container maxWidth="lg" className="py-8">
+        <Typography variant="h4" className="text-white font-bold mb-8 text-center">
+          Trading
+        </Typography>
 
-        {/* Order Book */}
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Order Book
-            </Typography>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" color="error">
-                Asks
-              </Typography>
-              {orderBook.asks.map((ask, index) => (
-                <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography color="error">{ask.price}</Typography>
-                  <Typography>{ask.amount}</Typography>
-                </Box>
-              ))}
-            </Box>
-            <Box>
-              <Typography variant="subtitle2" color="success.main">
-                Bids
-              </Typography>
-              {orderBook.bids.map((bid, index) => (
-                <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography color="success.main">{bid.price}</Typography>
-                  <Typography>{bid.amount}</Typography>
-                </Box>
-              ))}
-            </Box>
-          </Paper>
-        </Grid>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={8}>
+            <Paper className="p-6 bg-white/10 backdrop-blur-lg rounded-xl shadow-xl border border-white/20">
+              <Box className="mb-4">
+                <Typography variant="h6" className="text-white mb-2">
+                  {selectedPair} Price Chart
+                </Typography>
+                <Typography variant="h4" className="text-white">
+                  ${realTimePrice.toLocaleString()}
+                </Typography>
+              </Box>
+              <Box className="h-[400px]">
+                <Line
+                  data={chartData}
+                  options={{
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        labels: {
+                          color: 'white',
+                        },
+                      },
+                    },
+                    scales: {
+                      y: {
+                        grid: {
+                          color: 'rgba(255, 255, 255, 0.1)',
+                        },
+                        ticks: {
+                          color: 'white',
+                        },
+                      },
+                      x: {
+                        grid: {
+                          color: 'rgba(255, 255, 255, 0.1)',
+                        },
+                        ticks: {
+                          color: 'white',
+                        },
+                      },
+                    },
+                  }}
+                />
+              </Box>
+            </Paper>
+          </Grid>
 
-        {/* Trading Form */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Place Order
-            </Typography>
-            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Trading Pair</InputLabel>
-                    <Select
-                      value={selectedPair}
-                      label="Trading Pair"
-                      onChange={(e) => setSelectedPair(e.target.value)}
-                    >
-                      <MenuItem value="BTC/ETH">BTC/ETH</MenuItem>
-                      <MenuItem value="ETH/USDT">ETH/USDT</MenuItem>
-                      <MenuItem value="BTC/USDT">BTC/USDT</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Order Type</InputLabel>
-                    <Select
-                      value={orderType}
-                      label="Order Type"
-                      onChange={(e) => setOrderType(e.target.value)}
-                    >
-                      <MenuItem value="market">Market</MenuItem>
-                      <MenuItem value="limit">Limit</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
+          <Grid item xs={12} md={4}>
+            <Paper className="p-6 bg-white/10 backdrop-blur-lg rounded-xl shadow-xl border border-white/20">
+              <Typography variant="h6" className="text-white mb-4">
+                Place Order
+              </Typography>
+              <form onSubmit={handleOrderSubmit} className="space-y-4">
+                <FormControl fullWidth>
+                  <InputLabel className="text-white">Order Type</InputLabel>
+                  <Select
+                    value={orderType}
+                    label="Order Type"
+                    onChange={(e) => setOrderType(e.target.value)}
+                    className="text-white bg-white/5"
+                  >
+                    <MenuItem value="market">Market</MenuItem>
+                    <MenuItem value="limit">Limit</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControl fullWidth>
+                  <InputLabel className="text-white">Trading Pair</InputLabel>
+                  <Select
+                    value={selectedPair}
+                    label="Trading Pair"
+                    onChange={(e) => setSelectedPair(e.target.value)}
+                    className="text-white bg-white/5"
+                  >
+                    <MenuItem value="ETH/USDT">ETH/USDT</MenuItem>
+                    <MenuItem value="BTC/USDT">BTC/USDT</MenuItem>
+                    <MenuItem value="ETH/BTC">ETH/BTC</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <TextField
+                  fullWidth
+                  label="Amount"
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="bg-white/5"
+                  InputLabelProps={{ className: 'text-white' }}
+                  inputProps={{ className: 'text-white' }}
+                />
+
+                {orderType === 'limit' && (
                   <TextField
                     fullWidth
-                    label="Amount"
+                    label="Price"
                     type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    className="bg-white/5"
+                    InputLabelProps={{ className: 'text-white' }}
+                    inputProps={{ className: 'text-white' }}
                   />
-                </Grid>
-                {orderType === 'limit' && (
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="Price"
-                      type="number"
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                    />
-                  </Grid>
                 )}
-                <Grid item xs={12}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    size="large"
-                  >
-                    Place Order
-                  </Button>
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  className="bg-gradient-to-r from-rainbow-100 via-rainbow-400 to-rainbow-700 text-white hover:opacity-90"
+                >
+                  Place Order
+                </Button>
+              </form>
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper className="p-6 bg-white/10 backdrop-blur-lg rounded-xl shadow-xl border border-white/20">
+              <Typography variant="h6" className="text-white mb-4">
+                Order Book
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle1" className="text-red-400 mb-2">
+                    Asks
+                  </Typography>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell className="text-white">Price</TableCell>
+                          <TableCell className="text-white">Amount</TableCell>
+                          <TableCell className="text-white">Total</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {orderBook.asks.map((ask, index) => (
+                          <TableRow key={index} className="hover:bg-white/5">
+                            <TableCell className="text-red-400">{ask.price}</TableCell>
+                            <TableCell className="text-white">{ask.amount}</TableCell>
+                            <TableCell className="text-white">{ask.total}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle1" className="text-green-400 mb-2">
+                    Bids
+                  </Typography>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell className="text-white">Price</TableCell>
+                          <TableCell className="text-white">Amount</TableCell>
+                          <TableCell className="text-white">Total</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {orderBook.bids.map((bid, index) => (
+                          <TableRow key={index} className="hover:bg-white/5">
+                            <TableCell className="text-green-400">{bid.price}</TableCell>
+                            <TableCell className="text-white">{bid.amount}</TableCell>
+                            <TableCell className="text-white">{bid.total}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
                 </Grid>
               </Grid>
-            </Box>
-          </Paper>
+            </Paper>
+          </Grid>
         </Grid>
-
-        {/* Trading History */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Recent Orders
-            </Typography>
-            <TableContainer>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Pair</TableCell>
-                    <TableCell align="right">Amount</TableCell>
-                    <TableCell align="right">Price</TableCell>
-                    <TableCell align="right">Total</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Date</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {tradingHistory.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell>
-                        <Chip
-                          label={order.type.toUpperCase()}
-                          color={order.type === 'buy' ? 'success' : 'error'}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>{order.pair}</TableCell>
-                      <TableCell align="right">{order.amount}</TableCell>
-                      <TableCell align="right">{order.price}</TableCell>
-                      <TableCell align="right">{order.total}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={order.status}
-                          color={getStatusColor(order.status)}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>{order.date}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Container>
+      </Container>
+    </div>
   );
 };
 
