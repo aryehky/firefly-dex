@@ -1,5 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  IconButton,
+  Menu,
+  MenuItem,
+  Chip,
+  Tooltip,
+  CircularProgress,
+} from '@mui/material';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
@@ -14,6 +27,36 @@ const Navbar = () => {
   const [balance, setBalance] = useState('0.00');
   const [isValidNetwork, setIsValidNetwork] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const updateNetworkInfo = useCallback(async () => {
+    try {
+      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+      setNetwork(chainId);
+      validateNetwork(chainId);
+    } catch (error) {
+      console.error('Error getting network info:', error);
+    }
+  }, []);
+
+  const validateNetwork = (chainId) => {
+    // Replace with actual FireFly network chainId
+    const validChainId = '0x1';
+    setIsValidNetwork(chainId === validChainId);
+  };
+
+  const updateBalance = async (address) => {
+    try {
+      const balance = await window.ethereum.request({
+        method: 'eth_getBalance',
+        params: [address, 'latest'],
+      });
+      // Convert balance from wei to ETH
+      const ethBalance = (parseInt(balance, 16) / 1e18).toFixed(4);
+      setBalance(ethBalance);
+    } catch (error) {
+      console.error('Error getting balance:', error);
+    }
+  };
 
   useEffect(() => {
     // Check if wallet is already connected
@@ -46,37 +89,7 @@ const Navbar = () => {
         updateNetworkInfo();
       });
     }
-  }, []);
-
-  const updateNetworkInfo = async () => {
-    try {
-      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-      setNetwork(chainId);
-      validateNetwork(chainId);
-    } catch (error) {
-      console.error('Error getting network info:', error);
-    }
-  };
-
-  const validateNetwork = (chainId) => {
-    // Replace with actual FireFly network chainId
-    const validChainId = '0x1';
-    setIsValidNetwork(chainId === validChainId);
-  };
-
-  const updateBalance = async (address) => {
-    try {
-      const balance = await window.ethereum.request({
-        method: 'eth_getBalance',
-        params: [address, 'latest'],
-      });
-      // Convert balance from wei to ETH
-      const ethBalance = (parseInt(balance, 16) / 1e18).toFixed(4);
-      setBalance(ethBalance);
-    } catch (error) {
-      console.error('Error getting balance:', error);
-    }
-  };
+  }, [updateNetworkInfo]);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
