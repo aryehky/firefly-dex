@@ -25,10 +25,16 @@ const Home = () => {
     return (
         <div className="relative flex flex-col items-center justify-center min-h-[80vh] w-full px-4 md:px-0 overflow-hidden">
             {/* Pixelated Cloud Background */}
-            <div className="absolute inset-0 z-0">
-                <div className="absolute top-10 left-10 w-40 h-20 bg-cloud rounded-full opacity-70 blur-sm"></div>
-                <div className="absolute top-32 right-20 w-56 h-24 bg-cloud rounded-full opacity-60 blur-sm"></div>
-                <div className="absolute bottom-10 left-1/3 w-48 h-16 bg-cloud rounded-full opacity-50 blur-sm"></div>
+            <div className="absolute inset-0 z-0 overflow-hidden">
+                <div className="absolute top-10 left-10 w-40 h-20 opacity-70 animate-float-slow">
+                    <img src="/firefly.svg" alt="fire" className="w-full h-full pixelated" />
+                </div>
+                <div className="absolute top-32 right-20 w-56 h-24 opacity-60 animate-float">
+                    <img src="/cloud.svg" alt="Cloud" className="w-full h-full pixelated" />
+                </div>
+                <div className="absolute bottom-10 left-1/3 w-48 h-16 opacity-50 animate-float-slow">
+                    <img src="/cloud.svg" alt="Cloud" className="w-full h-full pixelated" />
+                </div>
             </div>
             {/* Hero Header */}
             <header className="z-10 mt-20 mb-8 text-center">

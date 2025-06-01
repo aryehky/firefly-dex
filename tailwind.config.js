@@ -27,6 +27,8 @@ module.exports = {
         'gradient-x': 'gradient-x 15s ease infinite',
         'gradient-y': 'gradient-y 15s ease infinite',
         'gradient-xy': 'gradient-xy 15s ease infinite',
+        'float': 'float 6s ease-in-out infinite',
+        'float-slow': 'float 8s ease-in-out infinite',
       },
       keyframes: {
         'gradient-y': {
@@ -57,6 +59,14 @@ module.exports = {
           '50%': {
             'background-size': '200% 200%',
             'background-position': 'right center'
+          }
+        },
+        'float': {
+          '0%, 100%': {
+            transform: 'translateY(0)',
+          },
+          '50%': {
+            transform: 'translateY(-20px)',
           }
         }
       }
