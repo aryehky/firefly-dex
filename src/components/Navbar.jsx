@@ -1,20 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Box,
-  IconButton,
-  Menu,
-  MenuItem,
-  Chip,
-  Tooltip,
-} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import WarningIcon from '@mui/icons-material/Warning';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -23,6 +12,8 @@ const Navbar = () => {
   const [walletAddress, setWalletAddress] = useState('');
   const [network, setNetwork] = useState('');
   const [balance, setBalance] = useState('0.00');
+  const [isValidNetwork, setIsValidNetwork] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // Check if wallet is already connected
@@ -61,9 +52,16 @@ const Navbar = () => {
     try {
       const chainId = await window.ethereum.request({ method: 'eth_chainId' });
       setNetwork(chainId);
+      validateNetwork(chainId);
     } catch (error) {
       console.error('Error getting network info:', error);
     }
+  };
+
+  const validateNetwork = (chainId) => {
+    // Replace with actual FireFly network chainId
+    const validChainId = '0x1';
+    setIsValidNetwork(chainId === validChainId);
   };
 
   const updateBalance = async (address) => {
@@ -89,6 +87,7 @@ const Navbar = () => {
   };
 
   const handleWalletConnect = async () => {
+    setIsLoading(true);
     try {
       if (window.ethereum) {
         const accounts = await window.ethereum.request({
@@ -107,13 +106,47 @@ const Navbar = () => {
     } catch (error) {
       console.error('Error connecting wallet:', error);
       alert('Failed to connect wallet');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleNetworkSwitch = async () => {
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x1' }], // Replace with actual FireFly chainId
+      });
+    } catch (error) {
+      if (error.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x1',
+              chainName: 'FireFly Network',
+              nativeCurrency: {
+                name: 'ETH',
+                symbol: 'ETH',
+                decimals: 18
+              },
+              rpcUrls: ['https://rpc.firefly.network'],
+              blockExplorerUrls: ['https://explorer.firefly.network']
+            }]
+          });
+        } catch (addError) {
+          alert('Failed to add FireFly network');
+        }
+      } else {
+        alert('Failed to switch network');
+      }
     }
   };
 
   const getNetworkName = (chainId) => {
     switch (chainId) {
       case '0x1':
-        return 'Ethereum Mainnet';
+        return 'FireFly Network';
       case '0x3':
         return 'Ropsten Testnet';
       case '0x4':
@@ -149,13 +182,15 @@ const Navbar = () => {
           </Button>
           {walletConnected && (
             <>
-              <Tooltip title="Network Status">
+              <Tooltip title={isValidNetwork ? "Network Status" : "Please switch to FireFly Network"}>
                 <Chip
-                  icon={<SignalCellularAltIcon />}
+                  icon={isValidNetwork ? <SignalCellularAltIcon /> : <WarningIcon />}
                   label={getNetworkName(network)}
-                  color="primary"
+                  color={isValidNetwork ? "primary" : "error"}
                   variant="outlined"
                   size="small"
+                  onClick={handleNetworkSwitch}
+                  sx={{ cursor: 'pointer' }}
                 />
               </Tooltip>
               <Tooltip title="Wallet Balance">
@@ -177,8 +212,9 @@ const Navbar = () => {
             aria-controls="wallet-menu"
             aria-haspopup="true"
             onClick={handleMenu}
+            disabled={isLoading}
           >
-            <AccountBalanceWalletIcon />
+            {isLoading ? <CircularProgress size={24} color="inherit" /> : <AccountBalanceWalletIcon />}
           </IconButton>
           <Menu
             id="wallet-menu"
@@ -212,4 +248,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default Navbar; 
