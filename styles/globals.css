@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import pixel font */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* Custom styles */
+@layer base {
+  body {
+    @apply bg-skyblue min-h-screen;
+  }
+}
+
+/* Pixel art utility classes */
+@layer components {
+  .pixelated {
+    image-rendering: pixelated;
+  }
+  
+  .rounded-pixel {
+    border-radius: 0;
+  }
+  
+  .shadow-pixel {
+    box-shadow: 4px 4px 0px theme('colors.deepblue');
+  }
+  
+  .drop-shadow-pixel {
+    filter: drop-shadow(4px 4px 0px theme('colors.deepblue'));
+  }
+  
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-sm border-2 border-deepblue rounded-pixel shadow-pixel;
+  }
+
+  /* Rainbow text animation */
+  .rainbow-text {
+    background: linear-gradient(
+      to right,
+      theme('colors.coral'),
+      theme('colors.mint'),
+      theme('colors.skyblue'),
+      theme('colors.deepblue')
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: rainbow 3s linear infinite;
+    background-size: 200% auto;
+  }
+
+  @keyframes rainbow {
+    0% {
+      background-position: 0% center;
+    }
+    100% {
+      background-position: 200% center;
+    }
+  }
+} 
