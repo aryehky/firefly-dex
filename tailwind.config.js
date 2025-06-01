@@ -1,20 +1,27 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
+    "./app/**/*.{js,jsx,ts,tsx}",
+    "./components/**/*.{js,jsx,ts,tsx}",
+    "./styles/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
     extend: {
+      fontFamily: {
+        pixel: ['"Press Start 2P"', 'monospace'],
+      },
       colors: {
-        rainbow: {
-          100: '#ff0000',
-          200: '#ff7f00',
-          300: '#ffff00',
-          400: '#00ff00',
-          500: '#0000ff',
-          600: '#4b0082',
-          700: '#9400d3',
-        },
+        skyblue: '#7EC8E3',
+        coral: '#FF6B6B',
+        mint: '#A3E4D7',
+        deepblue: '#34495E',
+        cloud: '#FFFFFF',
+      },
+      boxShadow: {
+        pixel: '0 0 0 2px #34495E, 4px 4px 0 0 #34495E',
+      },
+      borderRadius: {
+        pixel: '0.25rem',
       },
       animation: {
         'gradient-x': 'gradient-x 15s ease infinite',
