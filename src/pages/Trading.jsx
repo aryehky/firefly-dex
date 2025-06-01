@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Grid,
@@ -46,9 +46,9 @@ const Trading = () => {
   const [amount, setAmount] = useState('');
   const [price, setPrice] = useState('');
   const [selectedPair, setSelectedPair] = useState('BTC/ETH');
-
-  // Mock data for the price chart
-  const chartData = {
+  const [realTimePrice, setRealTimePrice] = useState(null);
+  const [wsConnection, setWsConnection] = useState(null);
+  const [chartData, setChartData] = useState({
     labels: ['1h', '2h', '3h', '4h', '5h', '6h'],
     datasets: [
       {
@@ -58,7 +58,64 @@ const Trading = () => {
         tension: 0.4,
       },
     ],
-  };
+  });
+  const [orderBook, setOrderBook] = useState({
+    bids: [],
+    asks: []
+  });
+
+  // WebSocket connection setup
+  useEffect(() => {
+    const ws = new WebSocket('wss://api.fireflydex.com/ws');
+    
+    ws.onopen = () => {
+      console.log('WebSocket Connected');
+      // Subscribe to price updates
+      ws.send(JSON.stringify({
+        type: 'subscribe',
+        channel: 'price',
+        pair: selectedPair
+      }));
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'price') {
+        setRealTimePrice(data.price);
+        // Update chart data
+        setChartData(prevData => ({
+          ...prevData,
+          datasets: [{
+            ...prevData.datasets[0],
+            data: [...prevData.datasets[0].data.slice(1), data.price]
+          }]
+        }));
+      } else if (data.type === 'orderbook') {
+        setOrderBook(data.orderbook);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    setWsConnection(ws);
+
+    return () => {
+      ws.close();
+    };
+  }, [selectedPair]);
+
+  // Update WebSocket subscription when pair changes
+  useEffect(() => {
+    if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+      wsConnection.send(JSON.stringify({
+        type: 'subscribe',
+        channel: 'price',
+        pair: selectedPair
+      }));
+    }
+  }, [selectedPair, wsConnection]);
 
   const chartOptions = {
     responsive: true,
@@ -72,20 +129,6 @@ const Trading = () => {
         beginAtZero: false,
       },
     },
-  };
-
-  // Mock order book data
-  const orderBook = {
-    bids: [
-      { price: 0.052, amount: 1.5 },
-      { price: 0.051, amount: 2.3 },
-      { price: 0.050, amount: 3.1 },
-    ],
-    asks: [
-      { price: 0.053, amount: 1.2 },
-      { price: 0.054, amount: 2.1 },
-      { price: 0.055, amount: 1.8 },
-    ],
   };
 
   // Mock trading history data
@@ -138,8 +181,13 @@ const Trading = () => {
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
-              Price Chart
+              Price Chart - {selectedPair}
             </Typography>
+            {realTimePrice && (
+              <Typography variant="h4" color="primary" gutterBottom>
+                ${realTimePrice.toFixed(2)}
+              </Typography>
+            )}
             <Box sx={{ height: 400 }}>
               <Line data={chartData} options={chartOptions} />
             </Box>
