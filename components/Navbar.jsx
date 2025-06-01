@@ -142,7 +142,7 @@ const Navbar = () => {
             <button
               onClick={connectWallet}
               disabled={isLoading}
-              className="font-pixel bg-coral text-cloud border-2 border-deepblue rounded-pixel px-6 py-2 shadow-pixel hover:scale-105 transition-transform text-lg"
+              className="font-pixel bg-coral text-white border-2 border-deepblue rounded-pixel px-6 py-2 shadow-pixel hover:scale-105 transition-transform text-lg"
             >
               {isLoading ? '...' : 'CONNECT WALLET'}
             </button>

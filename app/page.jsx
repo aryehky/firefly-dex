@@ -18,22 +18,22 @@ const Home = () => {
         },
         {
             title: 'Easy Integration',
-            description: 'Seamless integration with popular wallets and trading tools',
+            descwhiteription: 'Seamless integration with popular wallets and trading tools',
             icon: <span className="text-4xl">🔗</span>,
         },
     ];
     return (
         <div className="relative flex flex-col items-center justify-center min-h-[80vh] w-full px-4 md:px-0 overflow-hidden">
-            {/* Pixelated Cloud Background */}
+            {/* Pixelated Firefly Background */}
             <div className="absolute inset-0 z-0 overflow-hidden">
                 <div className="absolute top-10 left-10 w-40 h-20 opacity-70 animate-float-slow">
-                    <img src="/firefly.svg" alt="fire" className="w-full h-full pixelated" />
+                    <img src="/firefly.svg" alt="firefly" className="w-full h-full pixelated" />
                 </div>
                 <div className="absolute top-32 right-20 w-56 h-24 opacity-60 animate-float">
-                    <img src="/cloud.svg" alt="Cloud" className="w-full h-full pixelated" />
+                    <img src="/firefly.svg" alt="firefly" className="w-full h-full pixelated" />
                 </div>
-                <div className="absolute bottom-10 left-1/3 w-48 h-16 opacity-50 animate-float-slow">
-                    <img src="/cloud.svg" alt="Cloud" className="w-full h-full pixelated" />
+                <div className="absolute bottom-10 left-1/4 w-48 h-16 opacity-50 animate-float-slow">
+                    <img src="/firefly.svg" alt="firefly" className="w-full h-full pixelated" />
                 </div>
             </div>
             {/* Hero Header */}
@@ -42,20 +42,22 @@ const Home = () => {
                 <h2 className="font-pixel text-4xl md:text-6xl text-coral drop-shadow-pixel tracking-widest -mt-4">DEX</h2>
             </header>
             {/* Character Sprite Placeholder */}
-            <div className="z-10 flex justify-center mb-8">
+           {/* <div className="z-10 flex justify-center mb-8">
                 {/* Replace with your sprite image */}
+                {/*
                 <div className="w-20 h-20 bg-mint border-2 border-deepblue rounded-pixel pixelated flex items-center justify-center">
                     <span className="text-2xl">🦋</span>
                 </div>
             </div>
+            */}
             {/* Platform Tiles */}
-            <main className="z-10 flex flex-row items-end gap-8 mb-16">
+            <main className="z-10 flex flex-row items-end gap-6 mb-16">
                 {/* Left platform */}
                 <div className="flex gap-2">
                     {[...Array(4)].map((_, i) => (
                         <div
                             key={i}
-                            className="w-12 h-12 bg-cloud border-2 border-deepblue rounded-pixel shadow-pixel flex items-center justify-center"
+                            className="w-8 h-8 bg-white border-2 border-deepblue rounded-pixel shadow-pixel flex items-center justify-center"
                         ></div>
                     ))}
                 </div>
@@ -64,7 +66,7 @@ const Home = () => {
                     {[...Array(4)].map((_, i) => (
                         <div
                             key={i}
-                            className="w-12 h-12 bg-coral border-2 border-deepblue rounded-pixel shadow-pixel flex items-center justify-center"
+                            className="w-8 h-8 bg-coral border-2 border-deepblue rounded-pixel shadow-pixel flex items-center justify-center"
                         ></div>
                     ))}
                 </div>
@@ -82,7 +84,7 @@ const Home = () => {
             {/* Start Button */}
             <button
                 onClick={() => router.push('/trading')}
-                className="z-10 font-pixel bg-coral text-cloud border-2 border-deepblue rounded-pixel px-8 py-4 shadow-pixel hover:scale-105 transition-transform text-xl mt-4 mb-12"
+                className="z-10 font-pixel bg-coral text-white border-2 border-deepblue rounded-pixel px-8 py-4 shadow-pixel hover:scale-105 transition-transform text-xl mt-4 mb-12"
             >
                 START TRADING
             </button>

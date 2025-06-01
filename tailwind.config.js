@@ -15,7 +15,7 @@ module.exports = {
         coral: '#FF6B6B',
         mint: '#A3E4D7',
         deepblue: '#34495E',
-        cloud: '#FFFFFF',
+        white: '#FFFFFF',
       },
       boxShadow: {
         pixel: '0 0 0 2px #34495E, 4px 4px 0 0 #34495E',

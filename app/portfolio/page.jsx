@@ -31,12 +31,12 @@ const Portfolio = () => {
       <div className="w-full max-w-5xl mt-12 mb-8">
         <h1 className="text-4xl md:text-5xl text-deepblue font-pixel mb-2">PORTFOLIO</h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          <div className="bg-cloud border-2 border-deepblue rounded-pixel shadow-pixel p-6 flex flex-col items-center">
+          <div className="bg-white border-2 border-deepblue rounded-pixel shadow-pixel p-6 flex flex-col items-center">
             <div className="text-xl text-deepblue mb-2">Portfolio Value</div>
             <div className="text-3xl text-coral mb-2">${portfolioData.totalValue.toLocaleString()}</div>
             <div className="text-lg text-mint">Change: {portfolioData.change >= 0 ? '+' : ''}{portfolioData.change}</div>
           </div>
-          <div className="bg-cloud border-2 border-deepblue rounded-pixel shadow-pixel p-6 flex flex-col items-center col-span-2">
+          <div className="bg-white border-2 border-deepblue rounded-pixel shadow-pixel p-6 flex flex-col items-center col-span-2">
             <div className="text-xl text-deepblue mb-2">Assets</div>
             <table className="w-full text-left font-pixel">
               <thead>
@@ -58,7 +58,7 @@ const Portfolio = () => {
           </div>
         </div>
         {/* Transactions */}
-        <div className="bg-cloud border-2 border-deepblue rounded-pixel shadow-pixel p-6">
+        <div className="bg-white border-2 border-deepblue rounded-pixel shadow-pixel p-6">
           <div className="text-xl text-deepblue mb-4">Transactions</div>
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <input

@@ -53,7 +53,7 @@ const Trading = () => {
         <h1 className="text-4xl md:text-5xl text-deepblue font-pixel mb-2">TRADING</h1>
         <div className="flex flex-col md:flex-row gap-8">
           {/* Price Chart Placeholder */}
-          <div className="flex-1 bg-cloud border-2 border-deepblue rounded-pixel shadow-pixel p-6 mb-4 md:mb-0">
+          <div className="flex-1 bg-white border-2 border-deepblue rounded-pixel shadow-pixel p-6 mb-4 md:mb-0">
             <div className="mb-4">
               <div className="text-xl text-deepblue mb-2">{selectedPair} Price Chart</div>
               <div className="text-3xl text-coral mb-2">${realTimePrice.toLocaleString()}</div>
@@ -64,7 +64,7 @@ const Trading = () => {
             </div>
           </div>
           {/* Place Order */}
-          <form onSubmit={handleOrderSubmit} className="flex-1 bg-cloud border-2 border-deepblue rounded-pixel shadow-pixel p-6 flex flex-col gap-4">
+          <form onSubmit={handleOrderSubmit} className="flex-1 bg-white border-2 border-deepblue rounded-pixel shadow-pixel p-6 flex flex-col gap-4">
             <div className="text-xl text-deepblue mb-2">Place Order</div>
             <label className="text-deepblue">Order Type
               <select value={orderType} onChange={e => setOrderType(e.target.value)} className="block w-full mt-1 p-2 border-2 border-deepblue rounded-pixel bg-skyblue text-deepblue font-pixel">
@@ -87,11 +87,11 @@ const Trading = () => {
                 <input type="number" value={price} onChange={e => setPrice(e.target.value)} className="block w-full mt-1 p-2 border-2 border-deepblue rounded-pixel bg-skyblue text-deepblue font-pixel" />
               </label>
             )}
-            <button type="submit" className="font-pixel bg-coral text-cloud border-2 border-deepblue rounded-pixel px-6 py-2 shadow-pixel hover:scale-105 transition-transform text-lg mt-2">PLACE ORDER</button>
+            <button type="submit" className="font-pixel bg-coral text-white border-2 border-deepblue rounded-pixel px-6 py-2 shadow-pixel hover:scale-105 transition-transform text-lg mt-2">PLACE ORDER</button>
           </form>
         </div>
         {/* Order Book */}
-        <div className="mt-8 bg-cloud border-2 border-deepblue rounded-pixel shadow-pixel p-6">
+        <div className="mt-8 bg-white border-2 border-deepblue rounded-pixel shadow-pixel p-6">
           <div className="text-xl text-deepblue mb-4">Order Book</div>
           <div className="flex flex-col md:flex-row gap-8">
             <div className="flex-1">
