@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Container,
     Paper,
@@ -27,6 +27,7 @@ const Auth = () => {
     const [isRegistered, setIsRegistered] = useState(false);
     const [walletAddress, setWalletAddress] = useState('');
     const [network, setNetwork] = useState('');
+    const [isValidNetwork, setIsValidNetwork] = useState(false);
 
     const steps = [
         {
@@ -46,23 +47,63 @@ const Auth = () => {
         },
     ];
 
+    // Check for existing wallet connection
+    useEffect(() => {
+        const checkWalletConnection = async () => {
+            if (window.ethereum) {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        setWalletAddress(accounts[0]);
+                        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                        setNetwork(chainId);
+                        validateNetwork(chainId);
+                        setActiveStep(1);
+                    }
+                } catch (error) {
+                    console.error('Error checking wallet connection:', error);
+                }
+            }
+        };
+
+        checkWalletConnection();
+    }, []);
+
+    // Listen for network changes
+    useEffect(() => {
+        if (window.ethereum) {
+            window.ethereum.on('chainChanged', (chainId) => {
+                setNetwork(chainId);
+                validateNetwork(chainId);
+            });
+        }
+
+        return () => {
+            if (window.ethereum) {
+                window.ethereum.removeListener('chainChanged', () => {});
+            }
+        };
+    }, []);
+
+    const validateNetwork = (chainId) => {
+        // Replace with actual FireFly network chainId
+        const validChainId = '0x1';
+        setIsValidNetwork(chainId === validChainId);
+    };
+
     const connectWallet = async () => {
         setIsConnecting(true);
         setError('');
 
         try {
             if (window.ethereum) {
-                // Request account access
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 
                 if (accounts.length > 0) {
                     setWalletAddress(accounts[0]);
-                    
-                    // Get network information
                     const chainId = await window.ethereum.request({ method: 'eth_chainId' });
                     setNetwork(chainId);
-                    
-                    // Move to next step
+                    validateNetwork(chainId);
                     setActiveStep(1);
                 }
             } else {
@@ -78,14 +119,36 @@ const Auth = () => {
 
     const handleNetworkSwitch = async () => {
         try {
-            // Request network switch to FireFly network (example chainId)
             await window.ethereum.request({
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId: '0x1' }], // Replace with actual FireFly chainId
             });
             setActiveStep(2);
         } catch (error) {
-            setError('Failed to switch network. Please try again.');
+            if (error.code === 4902) {
+                // Chain not added to MetaMask
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: '0x1',
+                            chainName: 'FireFly Network',
+                            nativeCurrency: {
+                                name: 'ETH',
+                                symbol: 'ETH',
+                                decimals: 18
+                            },
+                            rpcUrls: ['https://rpc.firefly.network'],
+                            blockExplorerUrls: ['https://explorer.firefly.network']
+                        }]
+                    });
+                    setActiveStep(2);
+                } catch (addError) {
+                    setError('Failed to add FireFly network. Please try again.');
+                }
+            } else {
+                setError('Failed to switch network. Please try again.');
+            }
             console.error('Network switch error:', error);
         }
     };
@@ -175,14 +238,21 @@ const Auth = () => {
                                 </Button>
                             )}
                             {index === 1 && (
-                                <Button
-                                    variant="contained"
-                                    size="large"
-                                    onClick={handleNetworkSwitch}
-                                    fullWidth
-                                >
-                                    Switch to FireFly Network
-                                </Button>
+                                <>
+                                    {!isValidNetwork && (
+                                        <Alert severity="warning" sx={{ mb: 2 }}>
+                                            Please switch to the FireFly network to continue
+                                        </Alert>
+                                    )}
+                                    <Button
+                                        variant="contained"
+                                        size="large"
+                                        onClick={handleNetworkSwitch}
+                                        fullWidth
+                                    >
+                                        Switch to FireFly Network
+                                    </Button>
+                                </>
                             )}
                             {index === 2 && (
                                 <Button
