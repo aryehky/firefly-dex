@@ -68,3 +68,36 @@ We welcome contributions from the community! Please read our contributing guidel
 > 💡 **Note**: This project is under active development. Features and specifications may change as we continue to improve the platform.
 
 *Built with ❤️ on the FireFly blockchain*
+
+## Project Structure
+
+```
+firefly-dex/
+├── .git/
+├── .next/
+├── app/
+│   ├── auth/
+│   │   └── page.jsx
+│   ├── portfolio/
+│   │   └── page.jsx
+│   ├── trading/
+│   │   └── page.jsx
+│   ├── error.jsx
+│   ├── layout.jsx
+│   ├── loading.jsx
+│   ├── not-found.jsx
+│   └── page.jsx
+├── components/
+│   └── Navbar.jsx
+├── node_modules/
+├── public/
+├── styles/
+│   └── globals.css
+├── .gitignore
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── README.md
+└── tailwind.config.js
+
+```
