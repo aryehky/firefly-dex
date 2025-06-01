@@ -13,7 +13,7 @@ module.exports = {
       colors: {
         skyblue: '#7EC8E3',
         coral: '#FF6B6B',
-        mint: '#A3E4D7',
+        mint: '#5dd55d',
         deepblue: '#34495E',
         white: '#FFFFFF',
       },
