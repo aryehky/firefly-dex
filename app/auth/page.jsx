@@ -1,8 +1,7 @@
-capp/auth/page.jsx
 "use client";
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 const Auth = () => {
     const router = useRouter();
